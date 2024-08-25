@@ -156,7 +156,7 @@
         });
     </script>
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsJ4smLCV5P65qqtnT_zE5Sn6EgLt54YQ&libraries=places,geometry">
+        src="https://maps.googleapis.com/maps/api/js?key=&libraries=places,geometry">
     </script>
 </body>
 
