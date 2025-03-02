@@ -1,0 +1,254 @@
+<html>
+<body>
+<div class="container" style="background-color: #122f52; padding: 20px; border-radius: 10px; color: #ffffff; border: 2px solid #ffffff;">
+    <form id="pricing-form">
+        <h4><u>Process Service</u></h4>
+        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Standard Service of Process:</label>
+            <select class="form-control" id="service_of_process" onchange="updateCostAndMileage()" style="font-size: 1em; padding: 5px; width: 150px;">
+                <option value="no">No</option>
+                <option value="yes">Yes (+$95)</option>
+            </select>
+        </div>
+        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Electronic Skip Trace Required?</label>
+            <select class="form-control" id="skip_trace" onchange="updateCostAndMileage()" style="font-size: 1em; padding: 5px; width: 150px;">
+                <option value="no">No</option>
+                <option value="yes">Yes (+$95)</option>
+            </select>
+        </div>
+        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Rush Service (first attempt within 24 hours):</label>
+            <select class="form-control" id="process_rush" onchange="updateCostAndMileage()" style="font-size: 1em; padding: 5px; width: 150px;">
+                <option value="no">No</option>
+                <option value="yes">Yes (+$75)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Address Documents are to be Served:</label>
+            <input type="text" class="form-control" id="process_address" oninput="updateCostAndMileage()" style="background-color: #ffffff; color: #000000;">
+        </div>
+		
+		<hr style="width: 100%; margin-left: 0; color: black; border-color: navy blue; border-width: 2px;">
+		<h4><u>Filing and Retrieval Service</u></h4>
+        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Standard Document Filing and Retrieval Service:</label>
+            <select class="form-control" id="document_retrieval" onchange="updateCostAndMileage()" style="font-size: 1em; padding: 5px; width: 150px;">
+                <option value="no">No</option>
+                <option value="yes">Yes (+$95)</option>
+            </select>
+        </div>
+        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Rush Service (within 24 hours):</label>
+            <select class="form-control" id="filing_rush" onchange="updateCostAndMileage()" style="font-size: 1em; padding: 5px; width: 150px;">
+                <option value="no">No</option>
+                <option value="yes">Yes (+$75)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Where Documents are to be Filed/Retrieved:</label>
+            <input type="text" class="form-control" id="filing_address" oninput="updateCostAndMileage()" style="background-color: #ffffff; color: #000000;">
+        </div>
+        
+		<hr style="width: 100%; margin-left: 0; color: black; border-color: navy blue; border-width: 2px;">
+		<h4><u>Mobile Notary Services</u></h4>
+        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Mobile Notary (select number of signatures):</label>
+            <select class="form-control" id="mobile_notary" onchange="updateCostAndMileage()" style="font-size: 1em; padding: 5px; width: 150px;">
+                <option value="0">No</option>
+                <option value="1">1</option>
+                <option value="2">2 (+$10)</option>
+                <option value="3">3 (+$20)</option>
+                <option value="4">4 (+$30)</option>
+                <option value="5">5 (+$40)</option>
+                <!-- Add more options as needed -->
+            </select>
+        </div>
+        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Rush Service (within 24 hours):</label>
+            <select class="form-control" id="notary_rush" onchange="updateCostAndMileage()" style="font-size: 1em; padding: 5px; width: 150px;">
+                <option value="no">No</option>
+                <option value="yes">Yes (+$75)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Address Documents are to be Notarized:</label>
+            <input type="text" class="form-control" id="notary_address" oninput="updateCostAndMileage()" style="background-color: #ffffff; color: #000000;">
+        </div>
+        
+		<hr style="width: 100%; margin-left: 0; color: black; border-color: navy blue; border-width: 2px;">
+        <div class="form-group">
+        
+            <h4><u>Total Number of Pages we will need to Print:</u></h4>
+            <input type="number" class="form-control" id="num_pages" oninput="updateCostAndMileage()" style="background-color: #ffffff; color: #000000;">
+        </div>
+    </form>
+    <h3 class="mt-4">Cost Estimate Summary</h3>
+    <div id="cost-breakdown" class="mt-4"></div>
+    <button onclick="printSummary()" style="margin-top: 20px; padding: 10px 20px; font-size: 1em; background-color: #ffffff; color: #122f52; border: none; border-radius: 5px;">Print Summary</button>
+</div>
+
+<script>
+let mileageCosts = {
+    process: 0,
+    filing: 0,
+    notary: 0
+};
+
+function updateCost() {
+    const serviceOfProcess = document.getElementById("service_of_process").value === "yes" ? 95 : 0;
+    const processRush = document.getElementById("process_rush").value === "yes" ? 75 : 0;
+    const skipTrace = document.getElementById("skip_trace").value === "yes" ? 95 : 0;
+    const documentRetrieval = document.getElementById("document_retrieval").value === "yes" ? 95 : 0;
+    const filingRush = document.getElementById("filing_rush").value === "yes" ? 75 : 0;
+    const numSignatures = parseInt(document.getElementById("mobile_notary").value);
+    const mobileNotaryBaseFee = numSignatures > 0 ? 95 : 0;
+    const additionalSignatures = numSignatures > 1 ? numSignatures - 1 : 0;
+    const signatureCost = additionalSignatures * 10;
+    const notaryRush = document.getElementById("notary_rush").value === "yes" ? 75 : 0;
+    const numPages = document.getElementById("num_pages").value || 0;
+    const pagesOver20 = numPages > 20 ? numPages - 20 : 0;
+    const pageCost = pagesOver20 * 0.25;
+
+    const totalMileageCost = mileageCosts.process + mileageCosts.filing + mileageCosts.notary;
+    const total = serviceOfProcess + processRush + skipTrace + documentRetrieval + filingRush + mobileNotaryBaseFee + signatureCost + notaryRush + totalMileageCost + pageCost;
+
+    let costBreakdownHtml = `
+        <table>
+            <tr><th>Service</th><th style="text-align: right;">Cost</th></tr>`;
+    if (serviceOfProcess > 0) {
+        costBreakdownHtml += `<tr><td>Standard Service of Process</td><td class="text-right" style="text-align: right;">$${serviceOfProcess.toFixed(2)}</td></tr>`;
+    }
+    if (skipTrace > 0) {
+        costBreakdownHtml += `<tr><td>Electronic Skip Trace Required</td><td class="text-right" style="text-align: right;">$${skipTrace.toFixed(2)}</td></tr>`;
+    }
+    if (processRush > 0) {
+        costBreakdownHtml += `<tr><td>Process Rush Service (within 24 hours)</td><td class="text-right" style="text-align: right;">$${processRush.toFixed(2)}</td></tr>`;
+    }
+    if (mileageCosts.process > 0) {
+        costBreakdownHtml += `<tr><td>Process Mileage Fee (Miles beyond 20: ${(mileageCosts.process / 1.25 + 20).toFixed(2)} @ $1.25/mile)</td><td class="text-right" style="text-align: right;">$${mileageCosts.process.toFixed(2)}</td></tr>`;
+    }
+    if (documentRetrieval > 0) {
+        costBreakdownHtml += `<tr><td>Standard Court Document Filing and Retrieval Service</td><td class="text-right" style="text-align: right;">$${documentRetrieval.toFixed(2)}</td></tr>`;
+    }
+    if (filingRush > 0) {
+        costBreakdownHtml += `<tr><td>Filing Rush Service (within 24 hours)</td><td class="text-right" style="text-align: right;">$${filingRush.toFixed(2)}</td></tr>`;
+    }
+    if (mileageCosts.filing > 0) {
+        costBreakdownHtml += `<tr><td>Filing Mileage Fee (Miles beyond 20: ${(mileageCosts.filing / 1.25 + 20).toFixed(2)} @ $1.25/mile)</td><td class="text-right" style="text-align: right;">$${mileageCosts.filing.toFixed(2)}</td></tr>`;
+    }
+    if (mobileNotaryBaseFee > 0) {
+        costBreakdownHtml += `<tr><td>Mobile Notary Service</td><td class="text-right" style="text-align: right;">$${mobileNotaryBaseFee.toFixed(2)}</td></tr>`;
+    }
+    if (signatureCost > 0) {
+        costBreakdownHtml += `<tr><td>Signatures Beyond First (Additional: ${additionalSignatures} @ $10/signature)</td><td class="text-right" style="text-align: right;">$${signatureCost.toFixed(2)}</td></tr>`;
+    }
+    if (notaryRush > 0) {
+        costBreakdownHtml += `<tr><td>Mobile Notary Rush Service (within 24 hours)</td><td class="text-right" style="text-align: right;">$${notaryRush.toFixed(2)}</td></tr>`;
+    }
+    if (mileageCosts.notary > 0) {
+        costBreakdownHtml += `<tr><td>Notary Mileage Fee (Miles beyond 20: ${(mileageCosts.notary / 1.25 + 20).toFixed(2)} @ $1.25/mile)</td><td class="text-right" style="text-align: right;">$${mileageCosts.notary.toFixed(2)}</td></tr>`;
+    }
+    if (pageCost > 0) {
+        costBreakdownHtml += `<tr><td>Printing Fee (Pages over 20: ${pagesOver20} pages @ $0.25/page)</td><td class="text-right" style="text-align: right;">$${pageCost.toFixed(2)}</td></tr>`;
+    }
+    costBreakdownHtml += `
+            <tr><td colspan="2"><hr style="border-top: 2px solid #ffffff;"></td></tr>
+            <tr class="total-row"><td><strong>Total Estimated Cost</strong></td><td class="text-right" style="text-align: right;"><strong>$${total.toFixed(2)}</strong></td></tr>
+        </table>`;
+
+    document.getElementById("cost-breakdown").innerHTML = costBreakdownHtml;
+}
+
+function calculateMileage() {
+    const origin = new google.maps.LatLng(48.118146, -123.430741); // Example origin
+
+    const calculateMileageCost = (address, type) => {
+        if (address) {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: address }, function(results, status) {
+                if (status === "OK") {
+                    const destination = results[0].geometry.location;
+                    const service = new google.maps.DistanceMatrixService();
+                    service.getDistanceMatrix({
+                        origins: [origin],
+                        destinations: [destination],
+                        travelMode: "DRIVING"
+                    }, function(response, status) {
+                        if (status === "OK") {
+                            const distance = response.rows[0].elements[0].distance.value / 1609.34;
+                            if (distance > 20) {
+                                mileageCosts[type] = (distance - 20) * 1.25;
+                            } else {
+                                mileageCosts[type] = 0;
+                            }
+                            updateCost();
+                        } else {
+                            console.error("Distance Matrix request failed due to " + status);
+                        }
+                    });
+                } else {
+                    console.error("Geocode was not successful for the following reason: " + status);
+                }
+            });
+        } else {
+            mileageCosts[type] = 0;
+            updateCost();
+        }
+    };
+
+    calculateMileageCost(document.getElementById("process_address").value, 'process');
+    calculateMileageCost(document.getElementById("filing_address").value, 'filing');
+    calculateMileageCost(document.getElementById("notary_address").value, 'notary');
+}
+
+function updateCostAndMileage() {
+    updateCost();
+    calculateMileage();
+}
+
+function printSummary() {
+    const printContents = document.getElementById("cost-breakdown").innerHTML;
+    const currentDate = new Date().toLocaleDateString();
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Print Summary</title>');
+    printWindow.document.write('<style>body { font-family: Arial, sans-serif; padding: 20px; } table { width: 100%; border-collapse: collapse; } th, td { padding: 10px; border: 1px solid #ddd; } th { background-color: #122f52; color: #ffffff; } .total-row { font-weight: bold; }</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write('<h1>Olympic Service Pros</h1>');
+    printWindow.document.write(`<p>Date: ${currentDate}</p>`);
+    printWindow.document.write('<h3>Cost Estimate Summary</h3>');
+    printWindow.document.write(printContents);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+}
+
+document.getElementById("process_address").addEventListener("blur", updateCostAndMileage);
+document.getElementById("process_address").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        updateCostAndMileage();
+    }
+});
+document.getElementById("filing_address").addEventListener("blur", updateCostAndMileage);
+document.getElementById("filing_address").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        updateCostAndMileage();
+    }
+});
+document.getElementById("notary_address").addEventListener("blur", updateCostAndMileage);
+document.getElementById("notary_address").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        updateCostAndMileage();
+    }
+});
+document.querySelectorAll('select').forEach(select => {
+    select.addEventListener('change', updateCostAndMileage);
+});
+document.getElementById('num_pages').addEventListener('input', updateCostAndMileage);
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsJ4smLCV5P65qqtnT_zE5Sn6EgLt54YQ&libraries=places,geometry"></script>
+</body>
+</html>
